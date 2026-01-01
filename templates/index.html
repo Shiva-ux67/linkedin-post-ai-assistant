@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LinkedIn Post Generator</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>LinkedIn Post Generator</h1>
+        <form id="postForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select name="role" id="role" onchange="toggleOtherRole()">
+                    <option value="Student">Student</option>
+                    <option value="Engineer">Engineer</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" name="role_other" id="role_other" placeholder="Your role" style="display:none;" />
+            </div>
+
+            <div class="form-group">
+                <label for="tone">Tone</label>
+                <select name="tone" id="tone">
+                    <option value="Professional">Professional</option>
+                    <option value="Conversational">Conversational</option>
+                    <option value="Friendly">Friendly</option>
+                </select>
+            </div>
+
+            <div class="form-group"><label>Purpose</label><input type="text" name="purpose" required /></div>
+            <div class="form-group"><label>Highlight</label><input type="text" name="highlight" /></div>
+            <div class="form-group"><label>Insights</label><input type="text" name="insights" /></div>
+            <div class="form-group"><label>Gratitude</label><input type="text" name="gratitude" /></div>
+            <div class="form-group"><label>Tags</label><input type="text" name="tags" /></div>
+            <div class="form-group"><label>Resources</label><input type="text" name="resources" /></div>
+            <div class="form-group"><label>Date</label><input type="text" name="date" /></div>
+            <div class="form-group"><label>Reflection</label><textarea name="reflection"></textarea></div>
+            <div class="form-group"><label>Call to Action</label><input type="text" name="cta" /></div>
+            <div class="form-group"><label>Hashtags</label><input type="text" name="hashtags" /></div>
+            <div class="form-group"><label>Extras</label><textarea name="extras"></textarea></div>
+
+            <button type="submit">Generate Post</button>
+        </form>
+
+        <div id="result" class="output-box" style="display:none;">
+            <h3>📝 Generated LinkedIn Post:</h3>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleOtherRole() {
+            const roleSelect = document.getElementById("role");
+            const roleOther = document.getElementById("role_other");
+            roleOther.style.display = roleSelect.value === "Other" ? "block" : "none";
+        }
+
+        document.getElementById("postForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            const response = await fetch("/generate", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.linkedin_post) {
+                const lines = data.linkedin_post.split("\n");
+                document.getElementById("output").innerHTML = lines.map(line => `<p>${line}</p>`).join("");
+
+                document.getElementById("result").style.display = "block";
+            } else {
+                document.getElementById("output").textContent = "❌ Error generating post: " + (data.error || "Unknown error");
+                document.getElementById("result").style.display = "block";
+            }
+        });
+    </script>
+</body>
+
+</html>
